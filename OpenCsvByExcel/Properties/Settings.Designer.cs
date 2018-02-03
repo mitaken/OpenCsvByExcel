@@ -71,5 +71,23 @@ namespace OpenCsvByExcel.Properties {
                 return ((int)(this["MaxColumnSize"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool HasHeaderRecord {
+            get {
+                return ((bool)(this["HasHeaderRecord"]));
+            }
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool AdjustColumnWidth {
+            get {
+                return ((bool)(this["AdjustColumnWidth"]));
+            }
+        }
     }
 }
