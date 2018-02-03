@@ -19,7 +19,7 @@ ExcelでCSV/TSVを開く際、テキストインポートウィザードなど�
 
 ## インストール方法 - Install
 
-1. [リリース](https://github.com/mitaken/OpenCsvByExcel/releases)より最新版をダウンロード(x86/x64は **OSではなく** インストールされているExcelに合わせます)
+1. [リリース](https://github.com/mitaken/OpenCsvByExcel/releases)より最新版をダウンロード
 1. 適当なフォルダにZipファイルを展開します
 1. Shortcut.vbsを実行すると右クリックメニューの送るにショートカットが作成されます
 
@@ -58,15 +58,27 @@ TSV（タブ区切りファイル）として取り扱う拡張子を羅列し�
 1カラムの最大文字数を設定します  
 1カラムあたりに大きな文字が設定される場合はこの値を修正してください
 
+### HasHeaderRecord
+
+ヘッダー行を認識させます  
+ヘッダーが存在するファイルを読み込む場合はTrue、存在しない場合はFalseを指定してください
+
+### AdjustColumnWidth
+
+カラム幅をデータの内容に応じて自動で調整します  
+自動調整する場合はTrue、初期サイズのままにする場合はFalseを指定してください
+
 ## 使用ライブラリ - Libraries
 
 * [Mozilla Universal Charset Detector](https://github.com/errepi/ude)
   * 文字コード自動検出
 * [CsvHelper](https://github.com/JoshClose/CsvHelper)
   * CSV/TSVファイルの読み込み
-* [ComInvokker](https://github.com/mitaken/ComInvoker)
+* [ComInvoker](https://github.com/mitaken/ComInvoker)
   * ADO/ExcelのCOMリソース開放
 
-## バージョン情報 - Versions
+## バージョン情報 - Version Histories
 * 1.0
   * 初版リリース
+* 1.1
+  * [Range.CopyFromRecordset](https://msdn.microsoft.com/ja-jp/vba/excel-vba/articles/range-copyfromrecordset-method-excel) から [QueryTables.Add](https://msdn.microsoft.com/ja-jp/vba/excel-vba/articles/querytables-add-method-excel) に読み込みを変更

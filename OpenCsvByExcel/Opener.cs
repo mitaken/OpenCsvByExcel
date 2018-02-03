@@ -45,7 +45,7 @@ namespace OpenCsvByExcel
         /// <param name="path">Csv file path</param>
         internal void Open(string path)
         {
-            Action<string, string> writeConsole = (key, value) => Console.WriteLine($"{path}: [{key}] => {value}");
+            void writeConsole(string key, string value) => Console.WriteLine($"{path}: [{key}] => {value}");
 
             using (var stream = File.OpenRead(path))
             {
@@ -61,7 +61,7 @@ namespace OpenCsvByExcel
                 var csvConfiguration = new Configuration()
                 {
                     DetectColumnCountChanges = true,
-                    HasHeaderRecord = false,
+                    HasHeaderRecord = Program.Settings.HasHeaderRecord,
                 };
                 //Change delimiter by extension
                 var extension = Path.GetExtension(path).ToLower();
@@ -80,15 +80,36 @@ namespace OpenCsvByExcel
                 using (var csv = new CsvReader(reader, csvConfiguration))
                 using (var invoker = new Invoker())
                 {
-                    Recordset recordset = null;
-                    while (csv.Read())
+                    //Read firt row
+                    if (!csv.Read())
                     {
-                        if (recordset == null)
-                        {
-                            recordset = CreateRecordset(invoker, csv.Context.Record.Length);
-                            writeConsole("FieldCount", recordset.Fields.Count.ToString("#,0"));
-                        }
+                        throw new InvalidDataException("Cannot load first raw");
+                    }
 
+                    //Create recordset
+                    string[] headers;
+                    if (csvConfiguration.HasHeaderRecord)
+                    {
+                        //Read header and skip header
+                        if (csv.ReadHeader() && csv.Read())
+                        {
+                            headers = csv.Context.HeaderRecord;
+                        }
+                        else
+                        {
+                            throw new InvalidDataException("Cannot load header");
+                        }
+                    }
+                    else
+                    {
+                        headers = Enumerable.Range(0, csv.Context.Record.Length)
+                            .Select(x => $"F{x}").ToArray();
+                    }
+                    var recordset = CreateRecordset(invoker, headers);
+                    writeConsole("FieldCount", recordset.Fields.Count.ToString("#,0"));
+
+                    do
+                    {
                         //Add recordset
                         var fields = invoker.Invoke<Fields>(recordset.Fields);
                         recordset.AddNew();
@@ -98,7 +119,7 @@ namespace OpenCsvByExcel
                         }
                         recordset.Update();
                         invoker.Release();//release fields
-                    }
+                    } while (csv.Read());
                     writeConsole("RecordCount", recordset.RecordCount.ToString("#,0"));
 
                     if (recordset?.RecordCount > 0)
@@ -108,10 +129,18 @@ namespace OpenCsvByExcel
                         excel.Visible = true;
 
                         var workbooks = invoker.Invoke<dynamic>(excel.Workbooks);
-                        var workbook = invoker.Invoke<dynamic>(workbooks.Add());
+                        invoker.Invoke<dynamic>(workbooks.Add());//Add Book1
                         var range = invoker.Invoke<dynamic>(excel.ActiveCell);
-                        var loadCount = range.CopyFromRecordset(recordset);
-                        writeConsole("ExcelLoadCount", loadCount.ToString("#,0"));
+                        var sheet = invoker.Invoke<dynamic>(excel.ActiveSheet);
+                        var queryTables = invoker.Invoke<dynamic>(sheet.QueryTables);
+                        var queryTable = invoker.Invoke<dynamic>(queryTables.Add(recordset, range));
+
+                        //App settings
+                        queryTable.FieldNames = Program.Settings.HasHeaderRecord;
+                        queryTable.AdjustColumnWidth = Program.Settings.AdjustColumnWidth;
+
+                        var result = queryTable.Refresh();
+                        writeConsole("RefreshRecordset", result.ToString());
                     }
                     writeConsole("ComStackCount", invoker.StackCount.ToString("#,0"));
                 }
@@ -122,13 +151,11 @@ namespace OpenCsvByExcel
         /// Create ADODB.Recordset
         /// </summary>
         /// <param name="invoker">ComInvoker</param>
-        /// <param name="columnCount">Column count</param>
+        /// <param name="headers">Header records</param>
         /// <returns>ADODB.Recordset</returns>
-        private Recordset CreateRecordset(Invoker invoker, int columnCount)
+        private Recordset CreateRecordset(Invoker invoker, string[] headers)
         {
             //Create recordset
-            var headers = Enumerable.Range(0, columnCount)
-                .Select(x => $"F{x}").ToArray();
             var recordset = invoker.Invoke<Recordset>(new Recordset());
             var headerFields = invoker.Invoke<Fields>(recordset.Fields);
             foreach (var header in headers)

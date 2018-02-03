@@ -18,7 +18,7 @@ namespace OpenCsvByExcel
                 new ParallelOptions() { MaxDegreeOfParallelism = Settings.ParallelOpen },
                 path =>
             {
-                Action<string> writeErrorConsole = (message) => Console.Error.WriteLine($"{path}: {message}");
+                void writeErrorConsole(string message) => Console.Error.WriteLine($"{path}: {message}");
 
                 if (File.Exists(path))
                 {
