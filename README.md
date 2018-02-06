@@ -68,6 +68,11 @@ TSV（タブ区切りファイル）として取り扱う拡張子を羅列し�
 カラム幅をデータの内容に応じて自動で調整します  
 自動調整する場合はTrue、初期サイズのままにする場合はFalseを指定してください
 
+### DetectColumnCountChanges
+
+行の途中でカラム数が変更されていた場合に処理を中断します  
+中断する場合はTrue、継続する場合はFalseを指定します
+
 ## 使用ライブラリ - Libraries
 
 * [Mozilla Universal Charset Detector](https://github.com/errepi/ude)
@@ -82,3 +87,5 @@ TSV（タブ区切りファイル）として取り扱う拡張子を羅列し�
   * 初版リリース
 * 1.1
   * [Range.CopyFromRecordset](https://msdn.microsoft.com/ja-jp/vba/excel-vba/articles/range-copyfromrecordset-method-excel) から [QueryTables.Add](https://msdn.microsoft.com/ja-jp/vba/excel-vba/articles/querytables-add-method-excel) に読み込みを変更
+* 1.2
+  * ヘッダー行とカラム数の不一致を許容するオプションを追加
