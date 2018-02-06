@@ -89,5 +89,14 @@ namespace OpenCsvByExcel.Properties {
                 return ((bool)(this["AdjustColumnWidth"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DetectColumnCountChanges {
+            get {
+                return ((bool)(this["DetectColumnCountChanges"]));
+            }
+        }
     }
 }

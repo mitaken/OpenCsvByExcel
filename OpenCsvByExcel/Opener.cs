@@ -60,7 +60,7 @@ namespace OpenCsvByExcel
 
                 var csvConfiguration = new Configuration()
                 {
-                    DetectColumnCountChanges = true,
+                    DetectColumnCountChanges = Program.Settings.DetectColumnCountChanges,
                     HasHeaderRecord = Program.Settings.HasHeaderRecord,
                 };
                 //Change delimiter by extension
@@ -112,8 +112,11 @@ namespace OpenCsvByExcel
                     {
                         //Add recordset
                         var fields = invoker.Invoke<Fields>(recordset.Fields);
+                        var csvColumnCount = csv.Context.Record.Length > fields.Count
+                            ? fields.Count
+                            : csv.Context.Record.Length;
                         recordset.AddNew();
-                        for (var i = 0; i < csv.Context.Record.Length; i++)
+                        for (var i = 0; i < csvColumnCount; i++)
                         {
                             fields[i].Value = csv.Context.Record[i];
                         }
