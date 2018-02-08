@@ -89,3 +89,5 @@ TSV（タブ区切りファイル）として取り扱う拡張子を羅列し�
   * [Range.CopyFromRecordset](https://msdn.microsoft.com/ja-jp/vba/excel-vba/articles/range-copyfromrecordset-method-excel) から [QueryTables.Add](https://msdn.microsoft.com/ja-jp/vba/excel-vba/articles/querytables-add-method-excel) に読み込みを変更
 * 1.2
   * ヘッダー行とカラム数の不一致を許容するオプションを追加
+* 1.3
+  * エラー表示改善およびヘッダー行のチェックを実施し、カラム名が空の場合にエラーとならないように対応した
