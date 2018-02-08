@@ -1,5 +1,6 @@
 ﻿using CsvHelper;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace OpenCsvByExcel
                 new ParallelOptions() { MaxDegreeOfParallelism = Settings.ParallelOpen },
                 path =>
             {
-                void writeErrorConsole(string message) => Console.Error.WriteLine($"{path}: {message}");
+                void showError(string message) => Trace.Fail($"{path}\n\n{message}");
 
                 if (File.Exists(path))
                 {
@@ -26,14 +27,18 @@ namespace OpenCsvByExcel
                     {
                         opener.Open(path);
                     }
-                    catch (BadDataException)
+                    catch (BadDataException e)
                     {
-                        writeErrorConsole("Incorrect field count");
+                        showError($"Error: {e.Message}\n{e.ReadingContext.RawRecord}");
+                    }
+                    catch (Exception e)
+                    {
+                        showError(e.ToString());
                     }
                 }
                 else
                 {
-                    writeErrorConsole("File does not exists");
+                    showError("File does not exists");
                 }
             });
         }
