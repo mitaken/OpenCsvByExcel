@@ -90,15 +90,18 @@ namespace OpenCsvByExcel
                     string[] headers;
                     if (csvConfiguration.HasHeaderRecord)
                     {
-                        //Read header and skip header
-                        if (csv.ReadHeader() && csv.Read())
+                        //Read header
+                        if (!csv.ReadHeader()) throw new BadDataException(csv.Context, "Cannot read header");
+
+                        //Check header
+                        headers = csv.Context.HeaderRecord;
+                        if (headers.Where(x => !string.IsNullOrEmpty(x)).GroupBy(x => x).Any(x => x.Count() > 1))
                         {
-                            headers = csv.Context.HeaderRecord;
+                            throw new BadDataException(csv.Context, "Same header name does not supported");
                         }
-                        else
-                        {
-                            throw new InvalidDataException("Cannot load header");
-                        }
+
+                        //Skip header
+                        if (!csv.Read()) throw new BadDataException(csv.Context, "Cannot skip header");
                     }
                     else
                     {
@@ -164,7 +167,7 @@ namespace OpenCsvByExcel
             foreach (var header in headers)
             {
                 headerFields.Append(
-                    /*Column Name*/header,
+                    /*Column Name*/string.IsNullOrEmpty(header) ? $"Column{headerFields.Count + 1}_{Guid.NewGuid()}" : header,
                     /*Column Type*/DataTypeEnum.adVarChar,
                     /*Column Size*/Program.Settings.MaxColumnSize,
                     /*Column Attr*/FieldAttributeEnum.adFldUpdatable);
