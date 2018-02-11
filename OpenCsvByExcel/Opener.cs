@@ -80,28 +80,16 @@ namespace OpenCsvByExcel
                 using (var csv = new CsvReader(reader, csvConfiguration))
                 using (var invoker = new Invoker())
                 {
-                    //Read firt row
-                    if (!csv.Read())
-                    {
-                        throw new InvalidDataException("Cannot load first raw");
-                    }
+                    //Read first row
+                    if (!csv.Read()) throw new BadDataException(csv.Context, "Cannot load first row");
 
                     //Create recordset
                     string[] headers;
                     if (csvConfiguration.HasHeaderRecord)
                     {
-                        //Read header
                         if (!csv.ReadHeader()) throw new BadDataException(csv.Context, "Cannot read header");
-
-                        //Check header
-                        headers = csv.Context.HeaderRecord;
-                        if (headers.Where(x => !string.IsNullOrEmpty(x)).GroupBy(x => x).Any(x => x.Count() > 1))
-                        {
-                            throw new BadDataException(csv.Context, "Same header name does not supported");
-                        }
-
-                        //Skip header
                         if (!csv.Read()) throw new BadDataException(csv.Context, "Cannot skip header");
+                        headers = csv.Context.HeaderRecord;
                     }
                     else
                     {
@@ -164,13 +152,26 @@ namespace OpenCsvByExcel
             //Create recordset
             var recordset = invoker.Invoke<Recordset>(new Recordset());
             var headerFields = invoker.Invoke<Fields>(recordset.Fields);
+            var columns = new HashSet<string>();
             foreach (var header in headers)
             {
+                var columnName = header;
+                if (string.IsNullOrEmpty(columnName))
+                {
+                    //column name is empty then "ColumnN_GUID"
+                    columnName = $"Column{headerFields.Count + 1}_{Guid.NewGuid()}";
+                }
+                else if (columns.Contains(columnName))
+                {
+                    //column name is duplicated then "OriginalColumnName_GUID"
+                    columnName += $"_{Guid.NewGuid()}";
+                }
                 headerFields.Append(
-                    /*Column Name*/string.IsNullOrEmpty(header) ? $"Column{headerFields.Count + 1}_{Guid.NewGuid()}" : header,
+                    /*Column Name*/columnName,
                     /*Column Type*/DataTypeEnum.adVarChar,
                     /*Column Size*/Program.Settings.MaxColumnSize,
                     /*Column Attr*/FieldAttributeEnum.adFldUpdatable);
+                columns.Add(columnName);
             }
             recordset.Open();
             invoker.Release();//release headerFields
